@@ -78,6 +78,7 @@
 #include <linux/irq.h>
 #include <linux/cpufreq_times.h>
 #include <linux/mutex.h>
+#include <linux/sched/loadavg.h>
 
 #include <asm/switch_to.h>
 #include <asm/tlb.h>
