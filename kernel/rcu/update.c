@@ -731,6 +731,12 @@ static int __noreturn rcu_tasks_kthread(void *arg)
 		synchronize_srcu(&tasks_rcu_exit_srcu);
 
 		/*
+		 * Wait a little bit incase held tasks are released
+		 * during their next timer ticks.
+		 */
+		schedule_timeout_interruptible(HZ/10);
+
+		/*
 		 * Each pass through the following loop scans the list
 		 * of holdout tasks, removing any that are no longer
 		 * holdouts.  When the list is empty, we are done.
@@ -746,14 +752,6 @@ static int __noreturn rcu_tasks_kthread(void *arg)
 			int rtst;
 			struct task_struct *t1;
 
-			if (list_empty(&rcu_tasks_holdouts))
-				break;
-
-			/* Slowly back off waiting for holdouts */
-			schedule_timeout_interruptible(HZ/fract);
-
-			if (fract > 1)
-				fract--;
 
 			rtst = READ_ONCE(rcu_task_stall_timeout);
 			needreport = rtst > 0 &&
@@ -767,6 +765,11 @@ static int __noreturn rcu_tasks_kthread(void *arg)
 				check_holdout_task(t, needreport, &firstreport);
 				cond_resched();
 			}
+
+			if (list_empty(&rcu_tasks_holdouts))
+				break;
+
+			schedule_timeout_interruptible(HZ);
 		}
 
 		/*
