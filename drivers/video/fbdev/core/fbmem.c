@@ -1025,9 +1025,6 @@ fb_set_var(struct fb_info *info, struct fb_var_screeninfo *var)
 
 				if (ret) {
 					info->var = old_var;
-					printk(KERN_WARNING "detected "
-						"fb_set_par error, "
-						"error code: %d\n", ret);
 					goto done;
 				}
 			}
@@ -1577,11 +1574,6 @@ static bool fb_do_apertures_overlap(struct apertures_struct *gena,
 		struct aperture *h = &hwa->ranges[i];
 		for (j = 0; j < gena->count; ++j) {
 			struct aperture *g = &gena->ranges[j];
-			printk(KERN_DEBUG "checking generic (%llx %llx) vs hw (%llx %llx)\n",
-				(unsigned long long)g->base,
-				(unsigned long long)g->size,
-				(unsigned long long)h->base,
-				(unsigned long long)h->size);
 			if (apertures_overlap(g, h))
 				return true;
 		}
@@ -1612,8 +1604,6 @@ static int do_remove_conflicting_framebuffers(struct apertures_struct *a,
 			(primary && gen_aper && gen_aper->count &&
 			 gen_aper->ranges[0].base == VGA_FB_PHYS)) {
 
-			printk(KERN_INFO "fb: switching to %s from %s\n",
-			       name, registered_fb[i]->fix.id);
 			ret = do_unregister_framebuffer(registered_fb[i]);
 			if (ret)
 				return ret;
@@ -1659,7 +1649,6 @@ static int do_register_framebuffer(struct fb_info *fb_info)
 				     MKDEV(FB_MAJOR, i), NULL, "fb%d", i);
 	if (IS_ERR(fb_info->dev)) {
 		/* Not fatal */
-		printk(KERN_WARNING "Unable to create device for framebuffer %d; errno = %ld\n", i, PTR_ERR(fb_info->dev));
 		fb_info->dev = NULL;
 	} else
 		fb_init_device(fb_info);
@@ -1902,7 +1891,6 @@ fbmem_init(void)
 
 	ret = register_chrdev(FB_MAJOR, "fb", &fb_fops);
 	if (ret) {
-		printk("unable to get major %d for fb devs\n", FB_MAJOR);
 		goto err_chrdev;
 	}
 
