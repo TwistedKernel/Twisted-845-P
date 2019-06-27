@@ -18,7 +18,6 @@
 #include "sdm845-xiaomi-common.dtsi"
 //#include "dipper-camera-sensor-mtp.dtsi"
 #include "sdm845-xiaomi-thermal-common.dtsi"
-#include "xiaomi-sde-display.dtsi"
 #include "dipper-p0-camera-sensor-mtp.dtsi"
 
 &qupv3_se10_i2c {
