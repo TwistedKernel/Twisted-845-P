@@ -2419,9 +2419,7 @@ static int glink_smem_native_probe(struct platform_device *pdev)
 	uint32_t irq_mask;
 	struct resource *r;
 	u32 *cpu_array;
-#ifdef CONFIG_IPC_LOGGING
 	char log_name[GLINK_NAME_SIZE*2+7] = {0};
-#endif
 
 	node = pdev->dev.of_node;
 
@@ -2582,7 +2580,6 @@ static int glink_smem_native_probe(struct platform_device *pdev)
 	}
 
 	einfo->debug_mask = QCOM_GLINK_DEBUG_ENABLE;
-#ifdef CONFIG_IPC_LOGGING
 	snprintf(log_name, sizeof(log_name), "%s_%s_xprt",
 			einfo->xprt_cfg.edge, einfo->xprt_cfg.name);
 	if (einfo->debug_mask & QCOM_GLINK_DEBUG_ENABLE)
@@ -2592,7 +2589,6 @@ static int glink_smem_native_probe(struct platform_device *pdev)
 		GLINK_ERR("%s: unable to create log context for [%s:%s]\n",
 			__func__, einfo->xprt_cfg.edge,
 			einfo->xprt_cfg.name);
-#endif
 	register_debugfs_info(einfo);
 	/* fake an interrupt on this edge to see if the remote side is up */
 	irq_handler(0, einfo);
@@ -2633,9 +2629,8 @@ static int glink_rpm_native_probe(struct platform_device *pdev)
 	char toc[RPM_TOC_SIZE];
 	uint32_t *tocp;
 	uint32_t num_toc_entries;
-#ifdef CONFIG_IPC_LOGGING
 	char log_name[GLINK_NAME_SIZE*2+7] = {0};
-#endif
+
 	node = pdev->dev.of_node;
 
 	einfo = kzalloc(sizeof(*einfo), GFP_KERNEL);
@@ -2841,7 +2836,6 @@ static int glink_rpm_native_probe(struct platform_device *pdev)
 		pr_err("%s: enable_irq_wake() failed on %d\n", __func__,
 								irq_line);
 	einfo->debug_mask = QCOM_GLINK_DEBUG_DISABLE;
-	#ifdef CONFIG_IPC_LOGGING
 	snprintf(log_name, sizeof(log_name), "%s_%s_xprt",
 			einfo->xprt_cfg.edge, einfo->xprt_cfg.name);
 	if (einfo->debug_mask & QCOM_GLINK_DEBUG_ENABLE)
@@ -2851,7 +2845,6 @@ static int glink_rpm_native_probe(struct platform_device *pdev)
 		GLINK_ERR("%s: unable to create log context for [%s:%s]\n",
 			__func__, einfo->xprt_cfg.edge,
 			einfo->xprt_cfg.name);
-#endif
 	register_debugfs_info(einfo);
 	einfo->xprt_if.glink_core_if_ptr->link_up(&einfo->xprt_if);
 	return 0;
