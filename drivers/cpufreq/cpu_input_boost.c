@@ -12,11 +12,22 @@
 #include <linux/msm_drm_notify.h>
 #include <linux/slab.h>
 #include <linux/version.h>
+#include <linux/module.h>
 
 /* The sched_param struct is located elsewhere in newer kernels */
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 10, 0)
 #include <uapi/linux/sched/types.h>
 #endif
+
+static unsigned int input_boost_freq_lp __read_mostly = CONFIG_INPUT_BOOST_FREQ_LP;
+static unsigned int input_boost_freq_hp __read_mostly = CONFIG_INPUT_BOOST_FREQ_PERF;
+static unsigned int max_boost_freq_lp __read_mostly = CONFIG_MAX_BOOST_FREQ_LP;
+static unsigned int max_boost_freq_hp __read_mostly = CONFIG_MAX_BOOST_FREQ_PERF;
+
+module_param(input_boost_freq_lp, uint, 0644);
+module_param(input_boost_freq_hp, uint, 0644);
+module_param(max_boost_freq_lp, uint, 0644);
+module_param(max_boost_freq_hp, uint, 0644);
 
 /* Available bits for boost state */
 #define SCREEN_OFF		BIT(0)
@@ -40,9 +51,9 @@ static u32 get_input_boost_freq(struct cpufreq_policy *policy)
 	u32 freq;
 
 	if (cpumask_test_cpu(policy->cpu, cpu_lp_mask))
-		freq = CONFIG_INPUT_BOOST_FREQ_LP;
+		freq = input_boost_freq_lp;
 	else
-		freq = CONFIG_INPUT_BOOST_FREQ_PERF;
+		freq = input_boost_freq_hp;
 
 	return min(freq, policy->max);
 }
@@ -52,9 +63,9 @@ static u32 get_max_boost_freq(struct cpufreq_policy *policy)
 	u32 freq;
 
 	if (cpumask_test_cpu(policy->cpu, cpu_lp_mask))
-		freq = CONFIG_MAX_BOOST_FREQ_LP;
+		freq = max_boost_freq_lp;
 	else
-		freq = CONFIG_MAX_BOOST_FREQ_PERF;
+		freq = max_boost_freq_hp;
 
 	return min(freq, policy->max);
 }
