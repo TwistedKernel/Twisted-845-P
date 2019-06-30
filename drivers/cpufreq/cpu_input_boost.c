@@ -32,9 +32,11 @@ module_param(max_boost_freq_hp, uint, 0644);
 module_param(input_boost_duration, short, 0644);
 
 /* Available bits for boost state */
-#define SCREEN_OFF		BIT(0)
-#define INPUT_BOOST		BIT(1)
-#define MAX_BOOST		BIT(2)
+enum {
+	SCREEN_OFF,
+	INPUT_BOOST,
+	MAX_BOOST,
+};
 
 struct boost_drv {
 	struct delayed_work input_unboost;
@@ -49,9 +51,9 @@ struct boost_drv {
 
 static struct boost_drv *boost_drv_g __read_mostly;
 
-static u32 get_input_boost_freq(struct cpufreq_policy *policy)
+static unsigned int get_input_boost_freq(struct cpufreq_policy *policy)
 {
-	u32 freq;
+	unsigned int freq;
 
 	if (cpumask_test_cpu(policy->cpu, cpu_lp_mask))
 		freq = input_boost_freq_lp;
@@ -61,9 +63,9 @@ static u32 get_input_boost_freq(struct cpufreq_policy *policy)
 	return min(freq, policy->max);
 }
 
-static u32 get_max_boost_freq(struct cpufreq_policy *policy)
+static unsigned int get_max_boost_freq(struct cpufreq_policy *policy)
 {
-	u32 freq;
+	unsigned int freq;
 
 	if (cpumask_test_cpu(policy->cpu, cpu_lp_mask))
 		freq = max_boost_freq_lp;
@@ -90,7 +92,7 @@ static void clear_boost_bit(struct boost_drv *b, u32 state)
 
 static void update_online_cpu_policy(void)
 {
-	u32 cpu;
+	unsigned int cpu;
 
 	/* Only one CPU from each cluster needs to be updated */
 	get_online_cpus();
@@ -191,7 +193,7 @@ static int cpu_boost_thread(void *data)
 		.sched_priority = MAX_RT_PRIO - 1
 	};
 	struct boost_drv *b = data;
-	u32 old_state = 0;
+	unsigned long old_state = 0;
 
 	sched_setscheduler_nocheck(current, SCHED_FIFO, &sched_max_rt_prio);
 
