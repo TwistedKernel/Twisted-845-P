@@ -23,11 +23,13 @@ static unsigned int input_boost_freq_lp __read_mostly = CONFIG_INPUT_BOOST_FREQ_
 static unsigned int input_boost_freq_hp __read_mostly = CONFIG_INPUT_BOOST_FREQ_PERF;
 static unsigned int max_boost_freq_lp __read_mostly = CONFIG_MAX_BOOST_FREQ_LP;
 static unsigned int max_boost_freq_hp __read_mostly = CONFIG_MAX_BOOST_FREQ_PERF;
+static unsigned short input_boost_duration __read_mostly = CONFIG_INPUT_BOOST_DURATION_MS;
 
 module_param(input_boost_freq_lp, uint, 0644);
 module_param(input_boost_freq_hp, uint, 0644);
 module_param(max_boost_freq_lp, uint, 0644);
 module_param(max_boost_freq_hp, uint, 0644);
+module_param(input_boost_duration, short, 0644);
 
 /* Available bits for boost state */
 #define SCREEN_OFF		BIT(0)
@@ -118,7 +120,7 @@ static void __cpu_input_boost_kick(struct boost_drv *b)
 	set_boost_bit(b, INPUT_BOOST);
 	wake_up(&b->boost_waitq);
 	mod_delayed_work(system_unbound_wq, &b->input_unboost,
-			 msecs_to_jiffies(CONFIG_INPUT_BOOST_DURATION_MS));
+			 msecs_to_jiffies(input_boost_duration));
 }
 
 void cpu_input_boost_kick(void)
