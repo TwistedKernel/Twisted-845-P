@@ -63,7 +63,7 @@ static const struct platform_freeze_ops *freeze_ops;
 static DECLARE_WAIT_QUEUE_HEAD(suspend_freeze_wait_head);
 
 enum freeze_state __read_mostly suspend_freeze_state;
-static DEFINE_RAW_SPINLOCK(suspend_freeze_lock);
+static DEFINE_SPINLOCK(suspend_freeze_lock);
 
 void freeze_set_ops(const struct platform_freeze_ops *ops)
 {
@@ -81,12 +81,12 @@ static void freeze_enter(void)
 {
 	trace_suspend_resume(TPS("machine_suspend"), PM_SUSPEND_FREEZE, true);
 
-	raw_spin_lock_irq(&suspend_freeze_lock);
+	spin_lock_irq(&suspend_freeze_lock);
 	if (pm_wakeup_pending())
 		goto out;
 
 	suspend_freeze_state = FREEZE_STATE_ENTER;
-	raw_spin_lock_irq(&suspend_freeze_lock);
+	spin_unlock_irq(&suspend_freeze_lock);
 
 	get_online_cpus();
 	cpuidle_resume();
@@ -100,11 +100,11 @@ static void freeze_enter(void)
 	cpuidle_pause();
 	put_online_cpus();
 
-	raw_spin_lock_irq(&suspend_freeze_lock);
+	spin_lock_irq(&suspend_freeze_lock);
 
  out:
 	suspend_freeze_state = FREEZE_STATE_NONE;
-	raw_spin_lock_irq(&suspend_freeze_lock);
+	spin_unlock_irq(&suspend_freeze_lock);
 
 	trace_suspend_resume(TPS("machine_suspend"), PM_SUSPEND_FREEZE, false);
 }
@@ -136,12 +136,12 @@ void freeze_wake(void)
 {
 	unsigned long flags;
 
-	raw_spin_lock_irqsave(&suspend_freeze_lock, flags);
+	spin_lock_irqsave(&suspend_freeze_lock, flags);
 	if (suspend_freeze_state > FREEZE_STATE_NONE) {
 		suspend_freeze_state = FREEZE_STATE_WAKE;
 		wake_up(&suspend_freeze_wait_head);
 	}
-	raw_spin_unlock_irqrestore(&suspend_freeze_lock, flags);
+	spin_unlock_irqrestore(&suspend_freeze_lock, flags);
 }
 EXPORT_SYMBOL_GPL(freeze_wake);
 
