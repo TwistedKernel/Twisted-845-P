@@ -492,7 +492,7 @@ link_va(struct vmap_area *va, struct rb_root *root,
 static __always_inline void
 unlink_va(struct vmap_area *va, struct rb_root *root)
 {
-	if (WARN_ON(RB_EMPTY_NODE(&va->rb_node)))
+	if (RB_EMPTY_NODE(&va->rb_node))
 		return;
 
 	if (root == &free_vmap_area_root)
