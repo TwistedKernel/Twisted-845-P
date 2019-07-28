@@ -1071,7 +1071,6 @@ check_device:
 	if (priv->hwmodel == 0 &&
 	    (hwmodel == XC_PRODUCT_ID_XC4000 ||
 	     hwmodel == XC_PRODUCT_ID_XC4100)) {
-		hwmodel == 0;
 		priv->hwmodel = hwmodel;
 		priv->hwvers = (hw_major << 8) | hw_minor;
 	} else if (priv->hwmodel == 0 || priv->hwmodel != hwmodel ||
