@@ -548,7 +548,6 @@ static void pm_qos_irq_release(struct kref *ref)
 static void pm_qos_irq_notify(struct irq_affinity_notify *notify,
 		const cpumask_t *unused_mask)
 {
-	unsigned long flags;
 	struct pm_qos_request *req = container_of(notify,
 					struct pm_qos_request, irq_notify);
 	struct pm_qos_constraints *c =
