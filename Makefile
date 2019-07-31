@@ -393,7 +393,7 @@ KBUILD_AFLAGS   := -D__ASSEMBLY__
 KBUILD_CFLAGS   := -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs -pipe \
 		   -fno-strict-aliasing -fno-common -fshort-wchar \
 		   -Werror-implicit-function-declaration \
-		   -Wno-format-security -ffast-math -march=armv8.3-a+crypto -mtune=cortex-a55 \
+		   -Wno-format-security -march=armv8.3-a+crypto -mtune=cortex-a55 \
 		   -std=gnu89
 KBUILD_CPPFLAGS := -D__KERNEL__
 KBUILD_AFLAGS_KERNEL :=
@@ -406,7 +406,7 @@ GCC_PLUGINS_CFLAGS :=
 
 # Add Some optimization flags for clang
 ifeq ($(cc-name),clang)
-KBUILD_CFLAGS   += -ffast-math -march=armv8.3-a+crypto -mtune=cortex-a55
+KBUILD_CFLAGS   += -march=armv8.3-a+crypto -mtune=cortex-a55
 endif
 
 # Read KERNELRELEASE from include/config/kernel.release (if it exists)
