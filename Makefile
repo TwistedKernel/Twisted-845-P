@@ -393,7 +393,6 @@ KBUILD_AFLAGS   := -D__ASSEMBLY__
 KBUILD_CFLAGS   := -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs -pipe \
 		   -fno-strict-aliasing -fno-common -fshort-wchar \
 		   -Werror-implicit-function-declaration \
-                   -ftree-loop-distribution \
 		   -Wno-format-security -ffast-math -march=armv8.3-a+crypto -mtune=cortex-a55 \
 		   -std=gnu89
 KBUILD_CPPFLAGS := -D__KERNEL__
