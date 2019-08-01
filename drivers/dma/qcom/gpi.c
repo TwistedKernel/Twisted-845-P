@@ -233,15 +233,6 @@ enum gpi_ch_state {
 	MAX_CH_STATES
 };
 
-static const char *const gpi_ch_state_str[MAX_CH_STATES] = {
-	[CH_STATE_NOT_ALLOCATED] = "NOT ALLOCATED",
-	[CH_STATE_ALLOCATED] = "ALLOCATED",
-	[CH_STATE_STARTED] = "STARTED",
-	[CH_STATE_STOPPED] = "STOPPED",
-	[CH_STATE_STOP_IN_PROC] = "STOP IN PROCESS",
-	[CH_STATE_ERROR] = "ERROR",
-};
-
 #define TO_GPI_CH_STATE_STR(state) ((state >= MAX_CH_STATES) ? \
 				    "INVALID" : gpi_ch_state_str[state])
 
