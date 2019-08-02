@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2010 - 2017 Novatek, Inc.
- * Copyright (C) 2018 XiaoMi, Inc.
+ * Copyright (C) 2019 XiaoMi, Inc.
  *
  * $Revision: 21600 $
  * $Date: 2018-01-12 15:21:45 +0800 (週五, 12 一月 2018) $
@@ -21,15 +21,15 @@
 
 #include <linux/i2c.h>
 #include <linux/input.h>
-
+#include <linux/pm_qos.h>
 
 #include "nt36xxx_mem_map.h"
 
 #define PINCTRL_STATE_ACTIVE		"pmx_ts_active"
 #define PINCTRL_STATE_SUSPEND		"pmx_ts_suspend"
 #define PINCTRL_STATE_RELEASE		"pmx_ts_release"
-
-#define NVT_DEBUG 1
+#define NVT_COORDS_ARR_SIZE 2
+#define NVT_DEBUG 0
 
 /*---GPIO number---*/
 #define NVTTOUCH_INT_PIN 943
@@ -71,7 +71,7 @@ extern const uint16_t touch_key_array[TOUCH_KEY_NUM];
 /*---Customerized func.---*/
 #define NVT_TOUCH_PROC 1
 #define NVT_TOUCH_EXT_PROC 1
-#define NVT_TOUCH_MP 1
+#define NVT_TOUCH_MP 0
 #define MT_PROTOCOL_B 1
 #define WAKEUP_GESTURE 1
 #if WAKEUP_GESTURE
@@ -80,9 +80,6 @@ extern const uint16_t gesture_key_array[];
 #define BOOT_UPDATE_FIRMWARE 1
 #define BOOT_UPDATE_FIRMWARE_NAME "novatek_nt36672_e10.fw"
 
-/*---ESD Protect.---*/
-#define NVT_TOUCH_ESD_PROTECT 0
-#define NVT_TOUCH_ESD_CHECK_PERIOD 1500	/* ms */
 #define NVT_LOCKDOWN_SIZE	8
 
 struct nvt_config_info {
@@ -96,7 +93,6 @@ struct nvt_config_info {
 struct nvt_ts_data {
 	struct i2c_client *client;
 	struct input_dev *input_dev;
-	struct work_struct nvt_work;
 	struct delayed_work nvt_fwu_work;
 	struct regulator *vddio_reg;
 	struct regulator *lab_reg;
@@ -148,10 +144,12 @@ struct nvt_ts_data {
 	size_t config_array_size;
 	int current_index;
 	bool dev_pm_suspend;
-	struct work_struct suspend_work;
+	struct completion dev_pm_suspend_completion;
 	struct work_struct resume_work;
 	struct workqueue_struct *event_wq;
-	struct completion dev_pm_suspend_completion;
+	struct pm_qos_request pm_qos_req;
+
+	struct proc_dir_entry *input_proc;
 };
 
 struct nvt_mode_switch {
@@ -161,7 +159,7 @@ struct nvt_mode_switch {
 };
 
 #if NVT_TOUCH_PROC
-struct nvt_flash_data{
+struct nvt_flash_data {
 	rwlock_t lock;
 	struct i2c_client *client;
 };
@@ -176,11 +174,11 @@ typedef enum {
 } RST_COMPLETE_STATE;
 
 typedef enum {
-    EVENT_MAP_HOST_CMD                      = 0x50,
-    EVENT_MAP_HANDSHAKING_or_SUB_CMD_BYTE   = 0x51,
-    EVENT_MAP_RESET_COMPLETE                = 0x60,
-    EVENT_MAP_FWINFO                        = 0x78,
-    EVENT_MAP_PROJECTID                     = 0x9A,
+	EVENT_MAP_HOST_CMD                      = 0x50,
+	EVENT_MAP_HANDSHAKING_or_SUB_CMD_BYTE   = 0x51,
+	EVENT_MAP_RESET_COMPLETE                = 0x60,
+	EVENT_MAP_FWINFO                        = 0x78,
+	EVENT_MAP_PROJECTID                     = 0x9A,
 } I2C_EVENT_MAP;
 
 /*---extern structures---*/
@@ -195,9 +193,6 @@ extern int32_t nvt_check_fw_reset_state(RST_COMPLETE_STATE check_reset_state);
 extern int32_t nvt_get_fw_info(void);
 extern int32_t nvt_clear_fw_status(void);
 extern int32_t nvt_check_fw_status(void);
-#if NVT_TOUCH_ESD_PROTECT
-extern void nvt_esd_check_enable(uint8_t enable);
-#endif /* #if NVT_TOUCH_ESD_PROTECT */
 extern void nvt_stop_crc_reboot(void);
 extern int32_t nvt_get_lockdown_info(char *lockdata);
 
