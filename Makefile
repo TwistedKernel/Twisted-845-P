@@ -1,6 +1,6 @@
 VERSION = 4
 PATCHLEVEL = 9
-SUBLEVEL = 186
+SUBLEVEL = 187
 EXTRAVERSION =
 NAME = Roaring Lionus
 
@@ -393,8 +393,7 @@ KBUILD_AFLAGS   := -D__ASSEMBLY__
 KBUILD_CFLAGS   := -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs -pipe \
 		   -fno-strict-aliasing -fno-common -fshort-wchar \
 		   -Werror-implicit-function-declaration \
-                   -ftree-loop-distribution \
-		   -Wno-format-security -ffast-math -march=armv8.3-a+crypto -mtune=cortex-a55 \
+		   -Wno-format-security \
 		   -std=gnu89
 KBUILD_CPPFLAGS := -D__KERNEL__
 KBUILD_AFLAGS_KERNEL :=
@@ -404,11 +403,6 @@ KBUILD_CFLAGS_MODULE  := -DMODULE
 KBUILD_LDFLAGS_MODULE := -T $(srctree)/scripts/module-common.lds
 LDFLAGS :=
 GCC_PLUGINS_CFLAGS :=
-
-# Add Some optimization flags for clang
-ifeq ($(cc-name),clang)
-KBUILD_CFLAGS   += -ffast-math -march=armv8.3-a+crypto -mtune=cortex-a55
-endif
 
 # Read KERNELRELEASE from include/config/kernel.release (if it exists)
 KERNELRELEASE = $(shell cat include/config/kernel.release 2> /dev/null)
@@ -525,6 +519,7 @@ ifneq ($(GCC_TOOLCHAIN),)
 CLANG_FLAGS	+= --gcc-toolchain=$(GCC_TOOLCHAIN)
 endif
 CLANG_FLAGS	+= -no-integrated-as
+CLANG_FLAGS	+= -Werror=unknown-warning-option
 KBUILD_CFLAGS	+= $(CLANG_FLAGS)
 KBUILD_AFLAGS	+= $(CLANG_FLAGS)
 endif
@@ -736,9 +731,21 @@ ifdef CONFIG_PROFILE_ALL_BRANCHES
 KBUILD_CFLAGS	+= -O2 $(call cc-disable-warning,maybe-uninitialized,)
 else
 ifeq ($(cc-name),clang)
-KBUILD_CFLAGS   += -O3
+KBUILD_CFLAGS   += -O3 -mcpu=cortex-a55 -mtune=cortex-a55
 else
-KBUILD_CFLAGS   += -O2
+KBUILD_CFLAGS   += -O2 -mcpu=cortex-a75.cortex-a55 -mtune=cortex-a75.cortex-a55
+KBUILD_CFLAGS	+= -ftree-loop-distribution
+
+ifdef CONFIG_POLLY_CLANG
+KBUILD_CFLAGS	+= -mllvm -polly \
+		   -mllvm -polly-run-dce \
+		   -mllvm -polly-run-inliner \
+		   -mllvm -polly-opt-fusion=max \
+		   -mllvm -polly-ast-use-context \
+		   -mllvm -polly-detect-keep-going \
+		   -mllvm -polly-vectorizer=stripmine \
+		   -mllvm -polly-invariant-load-hoisting
+endif
 endif
 endif
 endif
