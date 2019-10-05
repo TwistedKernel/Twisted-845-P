@@ -105,7 +105,6 @@ module_param_named(adj_max_shift, adj_max_shift, short, 0644);
 
 /* User knob to enable/disable adaptive lmk feature */
 static int enable_adaptive_lmk;
-module_param_named(enable_adaptive_lmk, enable_adaptive_lmk, int, 0644);
 
 /*
  * This parameter controls the behaviour of LMK when vmpressure is in
@@ -119,7 +118,6 @@ module_param_named(vmpressure_file_min, vmpressure_file_min, int, 0644);
 
 /* User knob to enable/disable oom reaping feature */
 static int oom_reaper;
-module_param_named(oom_reaper, oom_reaper, int, 0644);
 
 enum {
 	VMPRESSURE_NO_ADJUST = 0,
